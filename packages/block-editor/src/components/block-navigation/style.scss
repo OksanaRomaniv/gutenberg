@@ -34,6 +34,18 @@ $tree-item-height: 36px;
 	}
 }
 
+.block-editor-block-navigation__item {
+	display: flex;
+	align-items: center;
+
+	.block-editor-block-mover {
+		display: flex;
+		min-height: auto;
+		height: 28px;
+	}
+}
+
+// Styles for nested block navigation lists.
 .block-editor-block-navigation__list .block-editor-block-navigation__list {
 	margin-top: 2px;
 	border-left: $tree-border-width solid $light-gray-900;
