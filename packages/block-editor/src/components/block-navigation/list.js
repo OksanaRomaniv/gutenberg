@@ -51,6 +51,7 @@ export default function BlockNavigationList( {
 	showNestedBlocks,
 	showMovers,
 	parentBlockClientId,
+	isRootItem = true,
 } ) {
 	const shouldShowAppender = showAppender && !! parentBlockClientId;
 	const hasMovers = showMovers && blocks.length > 1;
@@ -61,13 +62,14 @@ export default function BlockNavigationList( {
 		 * Safari+VoiceOver won't announce the list otherwise.
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
-		<ul className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
+		<ul className="editor-block-navigation__list block-editor-block-navigation__list" role={ isRootItem ? 'tree' : 'group' }>
 			{ map( blocks, ( block ) => {
 				const blockType = getBlockType( block.name );
 				const isSelected = block.clientId === selectedBlockClientId;
+				const blockDisplayName = getBlockDisplayName( blockType, block.attributes );
 
 				return (
-					<li key={ block.clientId }>
+					<li key={ block.clientId } role="treeitem" aria-label={ blockDisplayName }>
 						<div className="editor-block-navigation__item block-editor-block-navigation__item">
 							<Button
 								className={ classnames( 'editor-block-navigation__item-button block-editor-block-navigation__item-button', {
@@ -76,7 +78,7 @@ export default function BlockNavigationList( {
 								onClick={ () => selectBlock( block.clientId ) }
 							>
 								<BlockIcon icon={ blockType.icon } showColors />
-								{ getBlockDisplayName( blockType, block.attributes ) }
+								{ blockDisplayName }
 								{ isSelected && <span className="screen-reader-text">{ __( '(selected block)' ) }</span> }
 							</Button>
 							{ hasMovers && ( <BlockMover clientIds={ [ block.clientId ] } /> ) }
@@ -86,10 +88,14 @@ export default function BlockNavigationList( {
 								blocks={ block.innerBlocks }
 								selectedBlockClientId={ selectedBlockClientId }
 								selectBlock={ selectBlock }
+<<<<<<< HEAD
 								parentBlockClientId={ block.clientId }
 								showAppender={ showAppender }
+=======
+								showMovers={ showMovers }
+>>>>>>> Use treeview role for Navigation Menu
 								showNestedBlocks
-								showMovers
+								isRootItem={ false }
 							/>
 						) }
 					</li>
