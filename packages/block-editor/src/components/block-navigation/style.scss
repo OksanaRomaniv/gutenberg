@@ -51,21 +51,10 @@ $tree-item-height: 36px;
 
 	&:hover {
 		@include menu-style__hover;
-
-		.block-editor-block-mover {
-			visibility: visible;
-		}
-	}
-
-	&:focus-within {
-		.block-editor-block-mover {
-			visibility: visible;
-		}
 	}
 
 	.block-editor-block-mover {
 		display: flex;
-		visibility: hidden;
 		min-height: auto;
 		margin: 5px;
 	}

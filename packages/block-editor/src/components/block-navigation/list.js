@@ -8,6 +8,7 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { Button } from '@wordpress/components';
+import { useState } from '@wordpress/element';
 import { getBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { create, getTextContent } from '@wordpress/rich-text';
@@ -54,6 +55,7 @@ export default function BlockNavigationList( {
 	isRootItem = true,
 } ) {
 	const shouldShowAppender = showAppender && !! parentBlockClientId;
+	const [ lastMovedBlockClientId, setLastMovedBlockClientId ] = useState();
 	const hasBlockMovers = showBlockMovers && blocks.length > 1;
 
 	return (
@@ -63,13 +65,14 @@ export default function BlockNavigationList( {
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
 		<ul className="editor-block-navigation__list block-editor-block-navigation__list" role={ isRootItem ? 'tree' : 'group' }>
-			{ map( blocks, ( block ) => {
-				const blockType = getBlockType( block.name );
-				const isSelected = block.clientId === selectedBlockClientId;
-				const blockDisplayName = getBlockDisplayName( blockType, block.attributes );
+			{ map( blocks, ( { name, clientId, attributes, innerBlocks } ) => {
+				const blockType = getBlockType( name );
+				const isSelected = clientId === selectedBlockClientId;
+				const wasLastMoved = clientId === lastMovedBlockClientId;
+				const blockDisplayName = getBlockDisplayName( blockType, attributes );
 
 				return (
-					<li key={ block.clientId } role="treeitem">
+					<li key={ clientId } role="treeitem">
 						<div
 							className={ classnames( 'editor-block-navigation__item block-editor-block-navigation__item', {
 								'is-selected': isSelected,
@@ -77,31 +80,29 @@ export default function BlockNavigationList( {
 						>
 							<Button
 								className="editor-block-navigation__item-button block-editor-block-navigation__item-button"
-								onClick={ () => selectBlock( block.clientId ) }
+								onClick={ () => selectBlock( clientId ) }
 							>
 								<BlockIcon icon={ blockType.icon } showColors />
 								{ blockDisplayName }
 								{ isSelected && <span className="screen-reader-text">{ __( '(selected block)' ) }</span> }
 							</Button>
 							{ hasBlockMovers && (
-								<BlockMover clientIds={ [ block.clientId ] } />
+								<BlockMover
+									isHidden={ ! isSelected && ! wasLastMoved }
+									clientIds={ [ clientId ] }
+									onMoveUp={ () => setLastMovedBlockClientId( clientId ) }
+									onMoveDown={ () => setLastMovedBlockClientId( clientId ) }
+								/>
 							) }
 						</div>
-						{ showNestedBlocks && !! block.innerBlocks && !! block.innerBlocks.length && (
+						{ showNestedBlocks && !! innerBlocks && !! innerBlocks.length && (
 							<BlockNavigationList
-								blocks={ block.innerBlocks }
+								blocks={ innerBlocks }
 								selectedBlockClientId={ selectedBlockClientId }
 								selectBlock={ selectBlock }
-<<<<<<< HEAD
-<<<<<<< HEAD
-								parentBlockClientId={ block.clientId }
+								parentBlockClientId={ clientId }
 								showAppender={ showAppender }
-=======
-								showMovers={ showMovers }
->>>>>>> Use treeview role for Navigation Menu
-=======
 								showBlockMovers={ showBlockMovers }
->>>>>>> Improve prop name
 								showNestedBlocks
 								isRootItem={ false }
 							/>
