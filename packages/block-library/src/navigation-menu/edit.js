@@ -39,9 +39,7 @@ function NavigationMenu( {
 	clientId,
 	pages,
 	isRequesting,
-	backgroundColor,
 	textColor,
-	setBackgroundColor,
 	setTextColor,
 	setAttributes,
 } ) {
@@ -134,7 +132,7 @@ function NavigationMenu( {
 }
 
 export default compose( [
-	withColors( { backgroundColor: 'background-color', textColor: 'color' } ),
+	withColors( { textColor: 'color' } ),
 	withSelect( ( select ) => {
 		const { getEntityRecords } = select( 'core' );
 		const { isResolving } = select( 'core/data' );
