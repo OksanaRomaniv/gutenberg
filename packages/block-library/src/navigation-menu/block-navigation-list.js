@@ -4,6 +4,7 @@
 import {
 	__experimentalBlockNavigationList,
 } from '@wordpress/block-editor';
+import { NavigableMenu } from '@wordpress/components';
 import {
 	useSelect,
 	useDispatch,
@@ -30,13 +31,18 @@ export default function BlockNavigationList( { clientId } ) {
 	} = useDispatch( 'core/block-editor' );
 
 	return (
-		<__experimentalBlockNavigationList
-			blocks={ [ block ] }
-			selectedBlockClientId={ selectedBlockClientId }
-			selectBlock={ selectBlock }
-			showNestedBlocks
-			showAppender
-			showBlockMovers
-		/>
+		<NavigableMenu
+			role="presentation"
+			className="editor-block-navigation__container block-editor-block-navigation__container"
+		>
+			<__experimentalBlockNavigationList
+				blocks={ [ block ] }
+				selectedBlockClientId={ selectedBlockClientId }
+				selectBlock={ selectBlock }
+				showNestedBlocks
+				showAppender
+				showBlockMovers
+			/>
+		</NavigableMenu>
 	);
 }
