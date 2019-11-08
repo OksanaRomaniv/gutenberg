@@ -44,6 +44,7 @@ function getBlockDisplayName( blockType, attributes ) {
 
 function NavigationItem( { block, onSelect, isSelected, hasBlockMovers } ) {
 	const [ isHovered, setIsHovered ] = useState( false );
+	const [ isSelectionButtonFocused, setIsSelectionButtonFocused ] = useState( false );
 	const {
 		name,
 		clientId,
@@ -64,6 +65,8 @@ function NavigationItem( { block, onSelect, isSelected, hasBlockMovers } ) {
 			<Button
 				className="editor-block-navigation__item-button block-editor-block-navigation__item-button"
 				onClick={ onSelect }
+				onFocus={ () => setIsSelectionButtonFocused( true ) }
+				onBlur={ () => setIsSelectionButtonFocused( false ) }
 			>
 				<BlockIcon icon={ blockType.icon } showColors />
 				{ blockDisplayName }
@@ -71,7 +74,7 @@ function NavigationItem( { block, onSelect, isSelected, hasBlockMovers } ) {
 			</Button>
 			{ hasBlockMovers && (
 				<BlockMover
-					isHidden={ ! isHovered && ! isSelected }
+					isHidden={ ! isHovered && ! isSelected && ! isSelectionButtonFocused }
 					clientIds={ [ clientId ] }
 				/>
 			) }
