@@ -117,6 +117,8 @@ $tree-item-height: 36px;
 
 	&:focus:not(:disabled):not([aria-disabled="true"]) {
 		@include menu-style__focus;
+		// Override the default background color of focused buttons.
+		background-color: initial;
 	}
 }
 
