@@ -70,6 +70,10 @@ class ModalFrame extends Component {
 		if ( event.keyCode === ESCAPE ) {
 			this.handleEscapeKeyDown( event );
 		}
+
+		if ( this.props.onKeyDown ) {
+			this.props.onKeyDown( event );
+		}
 	}
 
 	/**
