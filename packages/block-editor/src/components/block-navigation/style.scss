@@ -44,9 +44,14 @@ $tree-item-height: 36px;
 		background: $light-gray-300;
 	}
 
+	&.is-appender {
+		width: $icon-button-size;
+	}
+
 	&:hover {
 		@include menu-style__hover;
 	}
+
 
 	.block-editor-block-mover {
 		display: flex;

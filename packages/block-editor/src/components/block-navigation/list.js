@@ -136,7 +136,7 @@ export default function BlockNavigationList( {
 			} ) }
 			{ shouldShowAppender && (
 				<li>
-					<div className="editor-block-navigation__item block-editor-block-navigation__item">
+					<div className="editor-block-navigation__item block-editor-block-navigation__item is-appender">
 						<ButtonBlockAppender
 							rootClientId={ parentBlockClientId }
 							__experimentalSelectBlockOnInsert={ false }
