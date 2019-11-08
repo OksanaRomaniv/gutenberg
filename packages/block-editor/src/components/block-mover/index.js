@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { first, last, castArray } from 'lodash';
+import { first, last, partial, castArray } from 'lodash';
 import classnames from 'classnames';
 
 /**
@@ -176,17 +176,11 @@ export default compose(
 			isLast: lastIndex === blockOrder.length - 1,
 		};
 	} ),
-	withDispatch( ( dispatch, { clientIds, rootClientId, onMoveUp, onMoveDown } ) => {
+	withDispatch( ( dispatch, { clientIds, rootClientId } ) => {
 		const { moveBlocksDown, moveBlocksUp } = dispatch( 'core/block-editor' );
 		return {
-			onMoveDown: () => {
-				moveBlocksDown( clientIds, rootClientId );
-				onMoveDown();
-			},
-			onMoveUp: () => {
-				moveBlocksUp( clientIds, rootClientId );
-				onMoveUp();
-			},
+			onMoveDown: partial( moveBlocksDown, clientIds, rootClientId ),
+			onMoveUp: partial( moveBlocksUp, clientIds, rootClientId ),
 		};
 	} ),
 	withInstanceId,

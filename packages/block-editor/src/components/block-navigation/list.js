@@ -42,7 +42,7 @@ function getBlockDisplayName( blockType, attributes ) {
 	return formatlessDisplayName;
 }
 
-function NavigationItem( { block, onSelect, isSelected, hasMover, onMove } ) {
+function NavigationItem( { block, onSelect, isSelected, hasBlockMovers } ) {
 	const [ isHovered, setIsHovered ] = useState( false );
 	const {
 		name,
@@ -69,12 +69,12 @@ function NavigationItem( { block, onSelect, isSelected, hasMover, onMove } ) {
 				{ blockDisplayName }
 				{ isSelected && <span className="screen-reader-text">{ __( '(selected block)' ) }</span> }
 			</Button>
-			<BlockMover
-				isHidden={ ! hasMover && ! isHovered }
-				clientIds={ [ clientId ] }
-				onMoveUp={ onMove }
-				onMoveDown={ onMove }
-			/>
+			{ hasBlockMovers && (
+				<BlockMover
+					isHidden={ ! isHovered && ! isSelected }
+					clientIds={ [ clientId ] }
+				/>
+			) }
 		</div>
 	);
 }
@@ -92,7 +92,6 @@ export default function BlockNavigationList( {
 	isRootItem = true,
 } ) {
 	const shouldShowAppender = showAppender && !! parentBlockClientId;
-	const [ lastMovedBlockClientId, setLastMovedBlockClientId ] = useState();
 	const hasBlockMovers = showBlockMovers && blocks.length > 1;
 
 	return (
@@ -107,8 +106,8 @@ export default function BlockNavigationList( {
 					clientId,
 					innerBlocks,
 				} = block;
+
 				const isSelected = clientId === selectedBlockClientId;
-				const wasLastMoved = clientId === lastMovedBlockClientId;
 
 				return (
 					<li key={ clientId } role="treeitem">
@@ -116,8 +115,7 @@ export default function BlockNavigationList( {
 							block={ block }
 							onSelect={ () => selectBlock( clientId ) }
 							isSelected={ isSelected }
-							onMove={ () => setLastMovedBlockClientId( clientId ) }
-							hasMover={ hasBlockMovers && isSelected && wasLastMoved }
+							hasBlockMovers={ hasBlockMovers }
 						/>
 						{ showNestedBlocks && !! innerBlocks && !! innerBlocks.length && (
 							<BlockNavigationList
