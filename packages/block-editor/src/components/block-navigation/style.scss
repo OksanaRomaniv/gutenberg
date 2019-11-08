@@ -20,7 +20,6 @@ $tree-item-height: 36px;
 	outline: none;
 	background: none;
 	padding: $grid-size;
-	margin-left: 0.8em;
 	width: $icon-button-size;
 	border-radius: 4px;
 
@@ -43,10 +42,6 @@ $tree-item-height: 36px;
 	&.is-selected:focus {
 		color: $dark-gray-700;
 		background: $light-gray-300;
-
-		.block-editor-block-mover {
-			visibility: visible;
-		}
 	}
 
 	&:hover {
@@ -55,7 +50,6 @@ $tree-item-height: 36px;
 
 	.block-editor-block-mover {
 		display: flex;
-		min-height: auto;
 		margin: 5px;
 	}
 }
