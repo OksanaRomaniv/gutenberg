@@ -97,31 +97,36 @@ function build_navigation_menu_html( $block, $colors ) {
 	$html = '';
 	foreach ( (array) $block['innerBlocks'] as $key => $menu_item ) {
 
-		$html .= '<li class="wp-block-navigation-menu-item ' . $colors['bg_css_classes'] . '"' . $colors['bg_inline_styles'] . '>' .
-			'<a
-				class="wp-block-navigation-menu-item__link ' . $colors['text_css_classes'] . '"
-				' . $colors['text_inline_styles'];
-
-		// Start appending HTML attributes to anchor tag.
+		// Creates the markup for the item content element.
 		if ( isset( $menu_item['attrs']['url'] ) ) {
-			$html .= ' href="' . $menu_item['attrs']['url'] . '"';
-		}
-		if ( isset( $menu_item['attrs']['title'] ) ) {
-			$html .= ' title="' . $menu_item['attrs']['title'] . '"';
+			$item_content_markup =
+				'<a
+					class="wp-block-navigation-menu-item__link ' . $colors['text_css_classes'] . '"
+					' . $colors['text_inline_styles'] .
+					' href="' . $menu_item['attrs']['url'] .
+					( $menu_item['attrs']['title'] ? ( ' title="' . $menu_item['attrs']['title'] . '"' ) : '' ) .
+					( isset( $menu_item['attrs']['opensInNewTab'] ) && true === $menu_item['attrs']['opensInNewTab']
+						? ' target="_blank"'
+						: ''
+					) .
+				'>' .
+					( isset( $menu_item['attrs']['label'] ) ? $menu_item['attrs']['label'] : '' ) .
+				'</a>';
+		} else {
+			$item_content_markup =
+				'<span
+					class="wp-block-navigation-menu-item__label ' . $colors['text_css_classes'] . '"
+					' . $colors['text_inline_styles'] .
+				'>' .
+					( isset( $menu_item['attrs']['label'] ) ? $menu_item['attrs']['label'] : '' ) .
+				'</span>';
 		}
 
-		if ( isset( $menu_item['attrs']['opensInNewTab'] ) && true === $menu_item['attrs']['opensInNewTab'] ) {
-			$html .= ' target="_blank"  ';
-		}
-		// End appending HTML attributes to anchor tag.
-
-		// Start anchor tag content.
-		$html .= '>';
-		if ( isset( $menu_item['attrs']['label'] ) ) {
-			$html .= $menu_item['attrs']['label'];
-		}
-		$html .= '</a>';
-		// End anchor tag content.
+		$html .=
+			'<li class="wp-block-navigation-menu-item ' . $colors['bg_css_classes'] . '"' .
+				$colors['bg_inline_styles'] .
+			'>' .
+				$item_content_markup;
 
 		if ( count( (array) $menu_item['innerBlocks'] ) > 0 ) {
 			$html .= build_navigation_menu_html( $menu_item, $colors );
