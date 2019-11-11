@@ -65,7 +65,7 @@ function NavigationList( { blocks, selectBlock, selectedBlockClientId, showAppen
 				);
 			} ) }
 			{ showAppender && blocks.length > 0 && ! isTreeRoot && (
-				<li>
+				<li role="treeitem">
 					<div className="editor-block-navigation__item block-editor-block-navigation__item is-appender">
 						<ButtonBlockAppender
 							rootClientId={ parentBlockClientId }
