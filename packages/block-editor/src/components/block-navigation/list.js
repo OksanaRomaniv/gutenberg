@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { animated } from 'react-spring/web.cjs';
 import { map } from 'lodash';
 import classnames from 'classnames';
 
@@ -8,7 +9,7 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { Button } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useRef, useState } from '@wordpress/element';
 import { getBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { create, getTextContent } from '@wordpress/rich-text';
@@ -19,6 +20,7 @@ import { create, getTextContent } from '@wordpress/rich-text';
 import BlockIcon from '../block-icon';
 import ButtonBlockAppender from '../button-block-appender';
 import BlockMover from '../block-mover';
+import useMovingAnimation from '../use-moving-animation';
 
 /**
  * Get the block display name, if it has one, or the block title if it doesn't.
@@ -42,59 +44,9 @@ function getBlockDisplayName( blockType, attributes ) {
 	return formatlessDisplayName;
 }
 
-function NavigationItem( { block, onSelect, isSelected, hasBlockMovers } ) {
-	const [ isHovered, setIsHovered ] = useState( false );
-	const [ isSelectionButtonFocused, setIsSelectionButtonFocused ] = useState( false );
-	const {
-		name,
-		clientId,
-		attributes,
-	} = block;
-	const blockType = getBlockType( name );
-	const blockDisplayName = getBlockDisplayName( blockType, attributes );
-
-	return (
-		<div
-			className={ classnames( 'editor-block-navigation__item block-editor-block-navigation__item', {
-				'is-selected': isSelected,
-			} ) }
-			onMouseEnter={ () => setIsHovered( true ) }
-			onMouseLeave={ () => setIsHovered( false ) }
-		>
-			<Button
-				className="editor-block-navigation__item-button block-editor-block-navigation__item-button"
-				onClick={ onSelect }
-				onFocus={ () => setIsSelectionButtonFocused( true ) }
-				onBlur={ () => setIsSelectionButtonFocused( false ) }
-			>
-				<BlockIcon icon={ blockType.icon } showColors />
-				{ blockDisplayName }
-				{ isSelected && <span className="screen-reader-text">{ __( '(selected block)' ) }</span> }
-			</Button>
-			{ hasBlockMovers && (
-				<BlockMover
-					isHidden={ ! isHovered && ! isSelected && ! isSelectionButtonFocused }
-					clientIds={ [ clientId ] }
-				/>
-			) }
-		</div>
-	);
-}
-
-export default function BlockNavigationList( {
-	blocks,
-	selectedBlockClientId,
-	selectBlock,
-	showAppender,
-
-	// Internal use only.
-	showNestedBlocks,
-	showBlockMovers,
-	parentBlockClientId,
-	isRootItem = true,
-} ) {
-	const shouldShowAppender = showAppender && !! parentBlockClientId;
-	const hasBlockMovers = showBlockMovers && blocks.length > 1;
+function NavigationList( { blocks, selectBlock, selectedBlockClientId, showAppender, showBlockMovers, showNestedBlocks, parentBlockClientId } ) {
+	const hasMultipleBlocks = blocks.length > 1;
+	const isTreeRoot = ! parentBlockClientId;
 
 	return (
 		/*
@@ -102,39 +54,23 @@ export default function BlockNavigationList( {
 		 * Safari+VoiceOver won't announce the list otherwise.
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
-		<ul className="editor-block-navigation__list block-editor-block-navigation__list" role={ isRootItem ? 'tree' : 'group' }>
-			{ map( blocks, ( block ) => {
-				const {
-					clientId,
-					innerBlocks,
-				} = block;
-
-				const isSelected = clientId === selectedBlockClientId;
-
+		<ul className="editor-block-navigation__list block-editor-block-navigation__list" role={ isTreeRoot ? 'tree' : 'group' }>
+			{ map( blocks, ( block, index ) => {
 				return (
-					<li key={ clientId } role="treeitem">
-						<NavigationItem
-							block={ block }
-							onSelect={ () => selectBlock( clientId ) }
-							isSelected={ isSelected }
-							hasBlockMovers={ hasBlockMovers }
-						/>
-						{ showNestedBlocks && !! innerBlocks && !! innerBlocks.length && (
-							<BlockNavigationList
-								blocks={ innerBlocks }
-								selectedBlockClientId={ selectedBlockClientId }
-								selectBlock={ selectBlock }
-								parentBlockClientId={ clientId }
-								showAppender={ showAppender }
-								showBlockMovers={ showBlockMovers }
-								showNestedBlocks
-								isRootItem={ false }
-							/>
-						) }
-					</li>
+					<NavigationBlock
+						key={ block.clientId }
+						block={ block }
+						selectBlock={ selectBlock }
+						selectedBlockClientId={ selectedBlockClientId }
+						position={ index }
+						hasSiblings={ hasMultipleBlocks }
+						showAppender={ showAppender }
+						showBlockMovers={ showBlockMovers }
+						showNestedBlocks={ showNestedBlocks }
+					/>
 				);
 			} ) }
-			{ shouldShowAppender && (
+			{ showAppender && hasMultipleBlocks && ! isTreeRoot && (
 				<li>
 					<div className="editor-block-navigation__item block-editor-block-navigation__item is-appender">
 						<ButtonBlockAppender
@@ -146,5 +82,88 @@ export default function BlockNavigationList( {
 			) }
 		</ul>
 		/* eslint-enable jsx-a11y/no-redundant-roles */
+	);
+}
+
+function NavigationBlock( { block, selectBlock, selectedBlockClientId, position, hasSiblings, showAppender, showBlockMovers, showNestedBlocks } ) {
+	const [ isHovered, setIsHovered ] = useState( false );
+	const [ isSelectionButtonFocused, setIsSelectionButtonFocused ] = useState( false );
+	const {
+		name,
+		clientId,
+		attributes,
+		innerBlocks,
+	} = block;
+	const blockType = getBlockType( name );
+	const blockDisplayName = getBlockDisplayName( blockType, attributes );
+
+	const wrapper = useRef( null );
+	const isSelected = clientId === selectedBlockClientId;
+	const adjustScrolling = false;
+	const enableAnimation = true;
+	const animateOnChange = position;
+
+	const style = useMovingAnimation( wrapper, isSelected, adjustScrolling, enableAnimation, animateOnChange );
+
+	return (
+		<animated.li ref={ wrapper } style={ style } role="treeitem">
+			<div
+				className={ classnames( 'editor-block-navigation__item block-editor-block-navigation__item', {
+					'is-selected': isSelected,
+				} ) }
+				onMouseEnter={ () => setIsHovered( true ) }
+				onMouseLeave={ () => setIsHovered( false ) }
+			>
+				<Button
+					className="editor-block-navigation__item-button block-editor-block-navigation__item-button"
+					onClick={ () => selectBlock( clientId ) }
+					onFocus={ () => setIsSelectionButtonFocused( true ) }
+					onBlur={ () => setIsSelectionButtonFocused( false ) }
+				>
+					<BlockIcon icon={ blockType.icon } showColors />
+					{ blockDisplayName }
+					{ isSelected && <span className="screen-reader-text">{ __( '(selected block)' ) }</span> }
+				</Button>
+				{ showBlockMovers && hasSiblings && (
+					<BlockMover
+						isHidden={ ! isHovered && ! isSelected && ! isSelectionButtonFocused }
+						clientIds={ [ clientId ] }
+					/>
+				) }
+			</div>
+			{ showNestedBlocks && !! innerBlocks && !! innerBlocks.length && (
+				<NavigationList
+					blocks={ innerBlocks }
+					selectedBlockClientId={ selectedBlockClientId }
+					selectBlock={ selectBlock }
+					showAppender={ showAppender }
+					showBlockMovers={ showBlockMovers }
+					showNestedBlocks={ showNestedBlocks }
+					parentBlockClientId={ clientId }
+				/>
+			) }
+		</animated.li>
+	);
+}
+
+export default function BlockNavigationList( props ) {
+	const {
+		blocks,
+		selectedBlockClientId,
+		selectBlock,
+		showAppender,
+		showBlockMovers,
+		showNestedBlocks,
+	} = props;
+
+	return (
+		<NavigationList
+			blocks={ blocks }
+			selectedBlockClientId={ selectedBlockClientId }
+			selectBlock={ selectBlock }
+			showAppender={ showAppender }
+			showBlockMovers={ showBlockMovers }
+			showNestedBlocks={ showNestedBlocks }
+		/>
 	);
 }

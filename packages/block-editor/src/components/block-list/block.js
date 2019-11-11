@@ -49,8 +49,8 @@ import BlockInsertionPoint from './insertion-point';
 import IgnoreNestedEvents from '../ignore-nested-events';
 import InserterWithShortcuts from '../inserter-with-shortcuts';
 import Inserter from '../inserter';
+import useMovingAnimation from '../use-moving-animation';
 import { isInsideRootBlock } from '../../utils/dom';
-import useMovingAnimation from './moving-animation';
 
 /**
  * Prevents default dragging behavior within a block to allow for multi-
