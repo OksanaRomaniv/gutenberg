@@ -48,11 +48,6 @@ function NavigationList( { blocks, selectBlock, selectedBlockClientId, showAppen
 	const isTreeRoot = ! parentBlockClientId;
 
 	return (
-		/*
-		 * Disable reason: The `list` ARIA role is redundant but
-		 * Safari+VoiceOver won't announce the list otherwise.
-		 */
-		/* eslint-disable jsx-a11y/no-redundant-roles */
 		<ul className="editor-block-navigation__list block-editor-block-navigation__list" role={ isTreeRoot ? 'tree' : 'group' }>
 			{ map( blocks, ( block, index ) => {
 				return (
@@ -80,7 +75,6 @@ function NavigationList( { blocks, selectBlock, selectedBlockClientId, showAppen
 				</li>
 			) }
 		</ul>
-		/* eslint-enable jsx-a11y/no-redundant-roles */
 	);
 }
 
