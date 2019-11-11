@@ -25,6 +25,7 @@ export const settings = {
 		anchor: true,
 		html: false,
 		inserter: true,
+		consumeChildToolbar: true,
 	},
 
 	edit,

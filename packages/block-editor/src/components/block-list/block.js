@@ -102,7 +102,7 @@ function BlockListBlock( {
 	enableAnimation,
 	isNavigationMode,
 	enableNavigationMode,
-	proxyToolbarToParent,
+	shouldProxyToolbarToParent,
 	shouldConsumeChildToolbar,
 } ) {
 	// Random state used to rerender the component if needed, ideally we don't need this
@@ -410,7 +410,7 @@ function BlockListBlock( {
 		( isSelected && isNavigationMode ) ||
 		( ! isNavigationMode && ! isFocusMode && isHovered && ! isEmptyDefaultBlock );
 	const shouldShowContextualToolbar =
-		! proxyToolbarToParent &&
+		! shouldProxyToolbarToParent &&
 		! isNavigationMode &&
 		! hasFixedToolbar &&
 		! showEmptyBlockSideInserter &&
@@ -648,6 +648,10 @@ const applyWithSelect = withSelect(
 			__unstableGetBlockWithoutInnerBlocks,
 			isNavigationMode,
 		} = select( 'core/block-editor' );
+
+		const {
+			getBlockSupport,
+		} = select( 'core/blocks' );
 		const block = __unstableGetBlockWithoutInnerBlocks( clientId );
 
 		const isSelected = isBlockSelected( clientId );
@@ -682,8 +686,8 @@ const applyWithSelect = withSelect(
 			hasFixedToolbar: hasFixedToolbar && isLargeViewport,
 			isLast: index === blockOrder.length - 1,
 			isNavigationMode: isNavigationMode(),
-			proxyToolbarToParent: 'core/navigation-menu-item' === block.name,
-			shouldConsumeChildToolbar: 'core/navigation-menu' === block.name,
+			shouldProxyToolbarToParent: getBlockSupport( block.name, 'proxyToolbarToParent', false ),
+			shouldConsumeChildToolbar: getBlockSupport( block.name, 'consumeChildToolbar', false ),
 			isRTL,
 
 			// Users of the editor.BlockListBlock filter used to be able to access the block prop
