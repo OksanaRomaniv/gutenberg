@@ -102,6 +102,8 @@ function BlockListBlock( {
 	enableAnimation,
 	isNavigationMode,
 	enableNavigationMode,
+	proxyToolbarToParent,
+	shouldConsumeChildToolbar,
 } ) {
 	// Random state used to rerender the component if needed, ideally we don't need this
 	const [ , updateRerenderState ] = useState( {} );
@@ -408,6 +410,7 @@ function BlockListBlock( {
 		( isSelected && isNavigationMode ) ||
 		( ! isNavigationMode && ! isFocusMode && isHovered && ! isEmptyDefaultBlock );
 	const shouldShowContextualToolbar =
+		! proxyToolbarToParent &&
 		! isNavigationMode &&
 		! hasFixedToolbar &&
 		! showEmptyBlockSideInserter &&
@@ -551,6 +554,14 @@ function BlockListBlock( {
 						focusOnMount={ isForcingContextualToolbar.current }
 					/>
 				) }
+
+				{ isParentOfSelectedBlock && shouldConsumeChildToolbar && (
+					<BlockContextualToolbar
+						// If the toolbar is being shown because of being forced
+						// it should focus the toolbar right after the mount.
+						focusOnMount={ isForcingContextualToolbar.current }
+					/>
+				) }
 				{
 					! isNavigationMode &&
 					! shouldShowContextualToolbar &&
@@ -638,6 +649,7 @@ const applyWithSelect = withSelect(
 			isNavigationMode,
 		} = select( 'core/block-editor' );
 		const block = __unstableGetBlockWithoutInnerBlocks( clientId );
+
 		const isSelected = isBlockSelected( clientId );
 		const { hasFixedToolbar, focusMode, isRTL } = getSettings();
 		const templateLock = getTemplateLock( rootClientId );
@@ -670,6 +682,8 @@ const applyWithSelect = withSelect(
 			hasFixedToolbar: hasFixedToolbar && isLargeViewport,
 			isLast: index === blockOrder.length - 1,
 			isNavigationMode: isNavigationMode(),
+			proxyToolbarToParent: 'core/navigation-menu-item' === block.name,
+			shouldConsumeChildToolbar: 'core/navigation-menu' === block.name,
 			isRTL,
 
 			// Users of the editor.BlockListBlock filter used to be able to access the block prop
