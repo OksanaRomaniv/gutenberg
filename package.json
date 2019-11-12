@@ -158,8 +158,8 @@
 		"worker-farm": "1.7.0"
 	},
 	"alias": {
-    "react-dom": "@hot-loader/react-dom"
-  },
+		"react-dom": "@hot-loader/react-dom"
+	},
 	"scripts": {
 		"prebuild": "npm run check-engines",
 		"clean:packages": "rimraf ./packages/*/build ./packages/*/build-module ./packages/*/build-style ./packages/*/node_modules",

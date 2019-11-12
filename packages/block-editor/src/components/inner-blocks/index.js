@@ -24,6 +24,7 @@ import DefaultBlockAppender from './default-block-appender';
  * Internal dependencies
  */
 import BlockList from '../block-list';
+import BlockGrid from '../block-list/grid';
 import { withBlockEditContext } from '../block-edit/context';
 import TemplatePicker from './template-picker';
 
@@ -111,6 +112,7 @@ class InnerBlocks extends Component {
 			__experimentalTemplateOptions: templateOptions,
 			__experimentalOnSelectTemplateOption: onSelectTemplateOption,
 			__experimentalAllowTemplateOptionSkip: allowTemplateOptionSkip,
+			__experimentalGridMode: gridMode,
 		} = this.props;
 		const { templateInProcess } = this.state;
 
@@ -120,6 +122,7 @@ class InnerBlocks extends Component {
 			'has-overlay': isSmallScreen && ( hasOverlay && ! isPlaceholder ), // Temporary click-through disable on desktop.
 		} );
 
+		const BlocksComponent = gridMode ? BlockGrid : BlockList;
 		return (
 			<div className={ classes }>
 				{ ! templateInProcess && (
@@ -129,7 +132,7 @@ class InnerBlocks extends Component {
 							onSelect={ onSelectTemplateOption }
 							allowSkip={ allowTemplateOptionSkip }
 						/> :
-						<BlockList
+						<BlocksComponent
 							rootClientId={ clientId }
 							renderAppender={ renderAppender }
 							__experimentalMoverDirection={ moverDirection }
