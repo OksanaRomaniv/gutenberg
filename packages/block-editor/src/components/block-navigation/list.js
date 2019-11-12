@@ -44,54 +44,18 @@ function getBlockDisplayName( blockType, attributes ) {
 	return formatlessDisplayName;
 }
 
-function NavigationList( { blocks, selectBlock, selectedBlockClientId, showAppender, showBlockMovers, showNestedBlocks, parentBlockClientId } ) {
-	const isTreeRoot = ! parentBlockClientId;
-
-	return (
-		<ul className="editor-block-navigation__list block-editor-block-navigation__list" role={ isTreeRoot ? 'tree' : 'group' }>
-			{ map( blocks, ( block, index ) => {
-				return (
-					<NavigationBlock
-						key={ block.clientId }
-						block={ block }
-						selectBlock={ selectBlock }
-						selectedBlockClientId={ selectedBlockClientId }
-						position={ index }
-						hasSiblings={ blocks.length > 1 }
-						showAppender={ showAppender }
-						showBlockMovers={ showBlockMovers }
-						showNestedBlocks={ showNestedBlocks }
-					/>
-				);
-			} ) }
-			{ showAppender && blocks.length > 0 && ! isTreeRoot && (
-				<li role="treeitem">
-					<div className="editor-block-navigation__item block-editor-block-navigation__item is-appender">
-						<ButtonBlockAppender
-							rootClientId={ parentBlockClientId }
-							__experimentalSelectBlockOnInsert={ false }
-						/>
-					</div>
-				</li>
-			) }
-		</ul>
-	);
-}
-
-function NavigationBlock( { block, selectBlock, selectedBlockClientId, position, hasSiblings, showAppender, showBlockMovers, showNestedBlocks } ) {
+function NavigationBlock( { block, onClick, isSelected, position, hasSiblings, showBlockMovers, children } ) {
 	const [ isHovered, setIsHovered ] = useState( false );
 	const [ isSelectionButtonFocused, setIsSelectionButtonFocused ] = useState( false );
 	const {
 		name,
 		clientId,
 		attributes,
-		innerBlocks,
 	} = block;
 	const blockType = getBlockType( name );
 	const blockDisplayName = getBlockDisplayName( blockType, attributes );
 
 	const wrapper = useRef( null );
-	const isSelected = clientId === selectedBlockClientId;
 	const adjustScrolling = false;
 	const enableAnimation = true;
 	const animateOnChange = position;
@@ -109,7 +73,7 @@ function NavigationBlock( { block, selectBlock, selectedBlockClientId, position,
 			>
 				<Button
 					className="editor-block-navigation__item-button block-editor-block-navigation__item-button"
-					onClick={ () => selectBlock( clientId ) }
+					onClick={ onClick }
 					onFocus={ () => setIsSelectionButtonFocused( true ) }
 					onBlur={ () => setIsSelectionButtonFocused( false ) }
 				>
@@ -124,17 +88,7 @@ function NavigationBlock( { block, selectBlock, selectedBlockClientId, position,
 					/>
 				) }
 			</div>
-			{ showNestedBlocks && !! innerBlocks && !! innerBlocks.length && (
-				<NavigationList
-					blocks={ innerBlocks }
-					selectedBlockClientId={ selectedBlockClientId }
-					selectBlock={ selectBlock }
-					showAppender={ showAppender }
-					showBlockMovers={ showBlockMovers }
-					showNestedBlocks={ showNestedBlocks }
-					parentBlockClientId={ clientId }
-				/>
-			) }
+			{ children }
 		</animated.li>
 	);
 }
@@ -142,21 +96,57 @@ function NavigationBlock( { block, selectBlock, selectedBlockClientId, position,
 export default function BlockNavigationList( props ) {
 	const {
 		blocks,
-		selectedBlockClientId,
 		selectBlock,
+		selectedBlockClientId,
 		showAppender,
 		showBlockMovers,
 		showNestedBlocks,
+		parentBlockClientId,
 	} = props;
 
+	const isTreeRoot = ! parentBlockClientId;
+	const hasAppender = showAppender && blocks.length > 0 && ! isTreeRoot;
+
 	return (
-		<NavigationList
-			blocks={ blocks }
-			selectedBlockClientId={ selectedBlockClientId }
-			selectBlock={ selectBlock }
-			showAppender={ showAppender }
-			showBlockMovers={ showBlockMovers }
-			showNestedBlocks={ showNestedBlocks }
-		/>
+		<ul className="editor-block-navigation__list block-editor-block-navigation__list" role={ isTreeRoot ? 'tree' : 'group' }>
+			{ map( blocks, ( block, index ) => {
+				const { clientId, innerBlocks } = block;
+				const hasNestedBlocks = showNestedBlocks && !! innerBlocks && !! innerBlocks.length;
+
+				return (
+					<NavigationBlock
+						key={ clientId }
+						block={ block }
+						onClick={ () => selectBlock( clientId ) }
+						isSelected={ selectedBlockClientId === clientId }
+						position={ index }
+						hasSiblings={ blocks.length > 1 }
+						showBlockMovers={ showBlockMovers }
+					>
+						{ hasNestedBlocks && (
+							<BlockNavigationList
+								blocks={ innerBlocks }
+								selectedBlockClientId={ selectedBlockClientId }
+								selectBlock={ selectBlock }
+								showAppender={ showAppender }
+								showBlockMovers={ showBlockMovers }
+								showNestedBlocks={ showNestedBlocks }
+								parentBlockClientId={ clientId }
+							/>
+						) }
+					</NavigationBlock>
+				);
+			} ) }
+			{ hasAppender && (
+				<li role="treeitem">
+					<div className="editor-block-navigation__item block-editor-block-navigation__item is-appender">
+						<ButtonBlockAppender
+							rootClientId={ parentBlockClientId }
+							__experimentalSelectBlockOnInsert={ false }
+						/>
+					</div>
+				</li>
+			) }
+		</ul>
 	);
 }
